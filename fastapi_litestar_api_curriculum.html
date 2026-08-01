@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A practical curriculum for mastering API programming, FastAPI, Litestar, PostgreSQL, Redis, testing, security, observability, and production deployment." />
+  <title>Production Python APIs — FastAPI, Litestar & Redis Curriculum</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0b1728;
+      --panel: rgba(16, 31, 51, 0.88);
+      --panel-strong: #12253d;
+      --text: #eef6ff;
+      --muted: #9db0c7;
+      --line: rgba(148, 180, 214, 0.18);
+      --primary: #42d5b0;
+      --primary-2: #64a8ff;
+      --accent: #c791ff;
+      --warning: #ffca6b;
+      --danger: #ff8585;
+      --success: #73e29f;
+      --code: #08131f;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --sidebar: 300px;
+    }
+    html[data-theme="light"] {
+      --bg: #eef4fb;
+      --bg-soft: #f7faff;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: #ffffff;
+      --text: #102235;
+      --muted: #5f7185;
+      --line: rgba(34, 71, 105, 0.16);
+      --primary: #0b8e72;
+      --primary-2: #256dcc;
+      --accent: #7b42c3;
+      --warning: #9a6200;
+      --danger: #bb3333;
+      --success: #167847;
+      --code: #132337;
+      --shadow: 0 24px 70px rgba(46, 77, 105, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 5%, rgba(66, 213, 176, 0.12), transparent 28rem),
+        radial-gradient(circle at 85% 12%, rgba(100, 168, 255, 0.14), transparent 32rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    a { color: var(--primary-2); }
+    code, pre, .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    button, input { font: inherit; }
+    .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; }
+    aside {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      border-right: 1px solid var(--line); background: rgba(5, 14, 25, 0.82);
+      backdrop-filter: blur(18px); padding: 22px 18px; z-index: 20;
+    }
+    html[data-theme="light"] aside { background: rgba(244, 249, 255, 0.86); }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 7px 8px 22px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #06111c;
+      font-weight: 900; box-shadow: 0 9px 28px rgba(66, 213, 176, 0.24);
+    }
+    .brand strong { display: block; letter-spacing: -0.02em; }
+    .brand small { color: var(--muted); }
+    .nav-group { margin: 8px 0 18px; }
+    .nav-label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .14em; padding: 0 10px 7px; }
+    .nav-link {
+      display: flex; justify-content: space-between; gap: 10px; align-items: center;
+      text-decoration: none; color: var(--muted); padding: 8px 10px; border-radius: 10px; font-size: .91rem;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--text); background: rgba(100, 168, 255, 0.10); }
+    .nav-link span:last-child { font-size: .74rem; opacity: .72; }
+    .side-actions { display: grid; gap: 9px; margin-top: 18px; }
+    .btn {
+      border: 1px solid var(--line); color: var(--text); background: var(--panel);
+      border-radius: 10px; padding: 9px 12px; cursor: pointer; transition: .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(100,168,255,.5); }
+    .btn.primary { background: linear-gradient(135deg, var(--primary), #35b8ba); color: #06131c; border: 0; font-weight: 800; }
+    main { min-width: 0; }
+    .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+    .hero-inner { max-width: 1240px; margin: 0 auto; padding: 72px 44px 58px; position: relative; z-index: 2; }
+    .eyebrow { color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: .14em; font-size: .75rem; }
+    h1 { font-size: clamp(2.7rem, 6vw, 5.5rem); line-height: .98; letter-spacing: -.055em; max-width: 1000px; margin: 15px 0 22px; }
+    .gradient-text { background: linear-gradient(90deg, var(--primary), var(--primary-2), var(--accent)); -webkit-background-clip: text; color: transparent; }
+    .hero p { max-width: 820px; color: var(--muted); font-size: 1.12rem; }
+    .hero-grid { display: grid; grid-template-columns: 1.4fr .8fr; gap: 22px; margin-top: 34px; align-items: stretch; }
+    .glass, .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .hero-card { padding: 25px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .stat { padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.025); }
+    .stat b { font-size: 1.4rem; display: block; }
+    .stat span { color: var(--muted); font-size: .78rem; }
+    .progress-shell { margin-top: 20px; }
+    .progress-label { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; margin-bottom: 7px; }
+    .progress-track { height: 10px; background: rgba(148,180,214,.14); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--primary), var(--primary-2)); transition: width .35s ease; }
+    .hero-side { padding: 24px; }
+    .hero-side h3 { margin-top: 0; }
+    .hero-side ul { padding-left: 20px; color: var(--muted); }
+    .content { max-width: 1240px; margin: 0 auto; padding: 48px 44px 100px; }
+    section { scroll-margin-top: 24px; margin-bottom: 64px; }
+    .section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 22px; }
+    .section-head h2 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing: -.035em; }
+    .section-head p { max-width: 640px; margin: 0; color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: .76rem; color: var(--muted); background: rgba(255,255,255,.025); }
+    .pill.primary { color: var(--primary); border-color: rgba(66,213,176,.3); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .card { padding: 23px; }
+    .card h3 { margin: 0 0 10px; letter-spacing: -.02em; }
+    .card p { color: var(--muted); }
+    .skill-list { display: grid; gap: 9px; margin-top: 18px; }
+    .skill { display: flex; justify-content: space-between; gap: 12px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; }
+    .skill span:last-child { color: var(--muted); font-size: .85rem; }
+    .callout { border-left: 4px solid var(--primary); padding: 16px 18px; background: rgba(66,213,176,.08); border-radius: 0 12px 12px 0; color: var(--muted); }
+    .callout strong { color: var(--text); }
+    .phase { margin: 22px 0 34px; }
+    .phase-head { display: flex; gap: 16px; align-items: center; margin-bottom: 14px; }
+    .phase-num { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--primary-2), var(--accent)); font-weight: 900; color: white; }
+    .phase-head h3 { margin: 0; font-size: 1.45rem; }
+    .phase-head p { margin: 1px 0 0; color: var(--muted); }
+    .week-list { display: grid; gap: 12px; }
+    details.week { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); overflow: hidden; }
+    details.week[open] { box-shadow: 0 12px 40px rgba(0,0,0,.11); }
+    summary { list-style: none; cursor: pointer; padding: 17px 19px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    .week-check { width: 21px; height: 21px; accent-color: var(--primary); cursor: pointer; }
+    .week-title b { display: block; }
+    .week-title span { color: var(--muted); font-size: .85rem; }
+    .chev { color: var(--muted); transition: transform .2s ease; }
+    details[open] .chev { transform: rotate(90deg); }
+    .week-body { border-top: 1px solid var(--line); padding: 20px; display: grid; grid-template-columns: 1.4fr .9fr; gap: 24px; }
+    .week-body h4 { margin: 0 0 8px; }
+    .week-body ul, .week-body ol { color: var(--muted); margin-top: 7px; }
+    .deliverable { background: rgba(100,168,255,.08); border: 1px solid rgba(100,168,255,.18); border-radius: 12px; padding: 16px; }
+    .deliverable strong { color: var(--primary-2); }
+    .architecture { padding: 24px; overflow-x: auto; }
+    .arch-flow { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 14px; align-items: stretch; min-width: 980px; }
+    .arch-node { border: 1px solid var(--line); border-radius: 13px; padding: 15px; text-align: center; background: rgba(255,255,255,.025); position: relative; }
+    .arch-node:not(:last-child)::after { content: "→"; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: 900; }
+    .arch-node b { display: block; margin-bottom: 5px; }
+    .arch-node span { color: var(--muted); font-size: .78rem; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; }
+    .tab-btn { border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; background: transparent; color: var(--muted); cursor: pointer; }
+    .tab-btn.active { color: #07111f; background: var(--primary); border-color: var(--primary); font-weight: 800; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .code-wrap { position: relative; }
+    pre { margin: 0; background: var(--code); color: #d9e9f9; border: 1px solid rgba(148,180,214,.16); border-radius: 13px; padding: 19px; overflow-x: auto; font-size: .86rem; line-height: 1.58; }
+    .copy-btn { position: absolute; right: 10px; top: 10px; background: #14283f; color: #dcecff; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 6px 9px; cursor: pointer; font-size: .75rem; }
+    .compare { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 14px; }
+    .compare th, .compare td { border: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; }
+    .compare th { background: rgba(100,168,255,.09); }
+    .compare td { color: var(--muted); }
+    .compare td:first-child { color: var(--text); font-weight: 700; }
+    .decision { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-top: 20px; }
+    .decision .or { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); color: var(--muted); }
+    .checklist { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .check-item { display: flex; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); }
+    .check-item::before { content: "✓"; color: var(--success); font-weight: 900; }
+    .search-wrap { display: flex; gap: 10px; margin: 15px 0 22px; }
+    .search { width: 100%; border: 1px solid var(--line); color: var(--text); background: var(--panel); border-radius: 12px; padding: 12px 14px; outline: none; }
+    .search:focus { border-color: var(--primary-2); box-shadow: 0 0 0 4px rgba(100,168,255,.09); }
+    .resource-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
+    .resource { display: block; text-decoration: none; border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--panel); }
+    .resource:hover { border-color: rgba(100,168,255,.5); transform: translateY(-1px); }
+    .resource b { color: var(--text); display: block; }
+    .resource span { color: var(--muted); font-size: .82rem; }
+    .capstone-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .cap-col { border: 1px solid var(--line); border-radius: 13px; padding: 14px; background: rgba(255,255,255,.025); }
+    .cap-col h4 { margin: 0 0 10px; }
+    .cap-card { color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 10px; margin-top: 8px; font-size: .84rem; }
+    .footer { border-top: 1px solid var(--line); color: var(--muted); text-align: center; padding: 28px; }
+    .mobile-toggle { display: none; position: fixed; right: 16px; bottom: 16px; z-index: 50; border: 0; border-radius: 50%; width: 50px; height: 50px; background: var(--primary); color: #06131c; font-weight: 900; box-shadow: var(--shadow); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+    @media (max-width: 1050px) {
+      :root { --sidebar: 260px; }
+      .hero-grid, .week-body { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .capstone-board { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 780px) {
+      .layout { display: block; }
+      aside { position: fixed; left: -290px; width: 280px; transition: left .25s ease; box-shadow: var(--shadow); }
+      aside.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .hero-inner, .content { padding-left: 20px; padding-right: 20px; }
+      .hero-inner { padding-top: 52px; }
+      .grid-2, .grid-3, .decision, .resource-list { grid-template-columns: 1fr; }
+      .decision .or { margin: auto; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 10px; }
+      .checklist { grid-template-columns: 1fr; }
+      .capstone-board { grid-template-columns: 1fr; }
+      h1 { font-size: 3rem; }
+    }
+    @media print {
+      aside, .mobile-toggle, .side-actions, .copy-btn, .search-wrap { display: none !important; }
+      .layout { display: block; }
+      body { background: white; color: #111; }
+      .hero-inner, .content { max-width: none; padding: 25px; }
+      .card, details.week, .glass { box-shadow: none; break-inside: avoid; }
+      details.week > * { display: block !important; }
+      .week-body { display: grid !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">API</div>
+        <div><strong>Production Python APIs</strong><small>Learning curriculum</small></div>
+      </div>
+      <nav>
+        <div class="nav-group">
+          <div class="nav-label">Start</div>
+          <a class="nav-link" href="#overview"><span>Overview</span><span>01</span></a>
+          <a class="nav-link" href="#strategy"><span>Learning strategy</span><span>02</span></a>
+          <a class="nav-link" href="#setup"><span>Environment setup</span><span>03</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Curriculum</div>
+          <a class="nav-link" href="#roadmap"><span>18-week roadmap</span><span>04</span></a>
+          <a class="nav-link" href="#architecture"><span>Real-world architecture</span><span>05</span></a>
+          <a class="nav-link" href="#redis"><span>Redis mastery map</span><span>06</span></a>
+          <a class="nav-link" href="#labs"><span>Core code labs</span><span>07</span></a>
+          <a class="nav-link" href="#comparison"><span>FastAPI vs Litestar</span><span>08</span></a>
+          <a class="nav-link" href="#capstone"><span>Capstone project</span><span>09</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Finish</div>
+          <a class="nav-link" href="#production"><span>Production checklist</span><span>10</span></a>
+          <a class="nav-link" href="#interview"><span>Interview readiness</span><span>11</span></a>
+          <a class="nav-link" href="#resources"><span>Official resources</span><span>12</span></a>
+        </div>
+      </nav>
+      <div class="side-actions">
+        <button class="btn" id="themeToggle">☀︎ Toggle theme</button>
+        <button class="btn" id="expandAll">Expand all weeks</button>
+        <button class="btn" id="resetProgress">Reset progress</button>
+        <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="hero" id="overview">
+        <div class="hero-inner">
+          <div class="eyebrow">From endpoint writer to production API engineer</div>
+          <h1>Master <span class="gradient-text">API Programming, FastAPI, Litestar & Redis</span></h1>
+          <p>A project-driven curriculum that teaches not just framework syntax, but the engineering decisions behind secure, reliable, observable, scalable Python APIs.</p>
+          <div class="hero-grid">
+            <div class="glass hero-card">
+              <div class="stats">
+                <div class="stat"><b>18</b><span>structured weeks</span></div>
+                <div class="stat"><b>7</b><span>production phases</span></div>
+                <div class="stat"><b>40+</b><span>hands-on deliverables</span></div>
+                <div class="stat"><b>1</b><span>portfolio capstone</span></div>
+              </div>
+              <div class="progress-shell">
+                <div class="progress-label"><span>Your curriculum progress</span><strong id="progressText">0%</strong></div>
+                <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+              </div>
+              <div class="tag-row">
+                <span class="pill primary">FastAPI</span><span class="pill primary">Litestar</span><span class="pill">PostgreSQL</span><span class="pill">SQLAlchemy 2</span><span class="pill">Redis</span><span class="pill">Docker</span><span class="pill">OpenTelemetry</span><span class="pill">Pytest</span>
+              </div>
+            </div>
+            <div class="glass hero-side">
+              <h3>Recommended pace</h3>
+              <ul>
+                <li><strong>Standard:</strong> 8–10 hours/week for 18 weeks.</li>
+                <li><strong>Accelerated:</strong> 15–18 hours/week for 10 weeks.</li>
+                <li><strong>Rule:</strong> 30% reading, 60% coding, 10% review.</li>
+                <li><strong>Output:</strong> every week ends with a demonstrable artifact.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="strategy">
+          <div class="section-head">
+            <div><span class="eyebrow">How to learn</span><h2>Build the mental model first</h2></div>
+            <p>A framework is the visible layer. Production engineering lives underneath it: HTTP semantics, concurrency, data consistency, failure handling, security, and observability.</p>
+          </div>
+          <div class="grid-3">
+            <article class="card"><h3>1. Protocol before framework</h3><p>Know what the client sends, what the server promises, which operations are safe or idempotent, and how caches and proxies behave.</p><div class="skill-list"><div class="skill"><span>HTTP methods</span><span>Semantics</span></div><div class="skill"><span>Status codes</span><span>Contracts</span></div><div class="skill"><span>Headers & content types</span><span>Metadata</span></div></div></article>
+            <article class="card"><h3>2. One service, two frameworks</h3><p>Build the capstone first in FastAPI, then port one bounded module to Litestar. Compare architecture, dependency injection, DTOs, plugins, and testing.</p><div class="skill-list"><div class="skill"><span>FastAPI</span><span>Primary implementation</span></div><div class="skill"><span>Litestar</span><span>Framework comparison</span></div><div class="skill"><span>Pure Python core</span><span>Portable logic</span></div></div></article>
+            <article class="card"><h3>3. Design for failure</h3><p>Assume databases time out, duplicate requests happen, workers crash, cache entries become stale, and downstream APIs return errors.</p><div class="skill-list"><div class="skill"><span>Timeouts & retries</span><span>Resilience</span></div><div class="skill"><span>Idempotency</span><span>Correctness</span></div><div class="skill"><span>Tracing & metrics</span><span>Diagnosis</span></div></div></article>
+          </div>
+          <div class="callout" style="margin-top:18px"><strong>Portfolio standard:</strong> do not call a feature “done” until it has validation, tests, error behavior, logs, documentation, and an explanation of its trade-offs. Endpoints are easy; dependable endpoints are the actual boss fight.</div>
+        </section>
+
+        <section id="setup">
+          <div class="section-head"><div><span class="eyebrow">Week 0</span><h2>Development environment</h2></div><p>Keep the toolchain simple and reproducible. Use a modern Python environment manager, containers for infrastructure, and automated quality checks from day one.</p></div>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Core toolchain</h3>
+              <div class="skill-list">
+                <div class="skill"><span>Python 3.12+</span><span>Typing, asyncio, performance</span></div>
+                <div class="skill"><span>uv</span><span>Environment & dependency management</span></div>
+                <div class="skill"><span>Ruff</span><span>Linting & formatting</span></div>
+                <div class="skill"><span>Pyright or mypy</span><span>Static type checking</span></div>
+                <div class="skill"><span>Docker Compose</span><span>PostgreSQL + Redis locally</span></div>
+                <div class="skill"><span>GitHub Actions</span><span>CI pipeline</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Bootstrap commands</h3>
+              <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>mkdir production-python-api && cd production-python-api
+uv init
+uv add "fastapi[standard]" litestar pydantic-settings
+uv add sqlalchemy asyncpg alembic redis httpx
+uv add --dev pytest pytest-asyncio pytest-cov ruff pyright
+
+docker compose up -d postgres redis
+uv run fastapi dev app/main.py</code></pre></div>
+              <p class="muted">Create <code>.env.example</code>, pin dependencies, and never commit real secrets.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="roadmap">
+          <div class="section-head"><div><span class="eyebrow">Main curriculum</span><h2>18-week production roadmap</h2></div><p>Each week contains concepts, labs, a concrete deliverable, and an exit criterion. Check completed weeks to save progress in your browser.</p></div>
+          <div class="search-wrap"><input class="search" id="weekSearch" placeholder="Search weeks: OAuth, Redis, SQLAlchemy, testing, observability…" /><button class="btn" id="clearSearch">Clear</button></div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">0</div><div><h3>Foundations</h3><p>Weeks 1–3 · Learn the platform underneath every Python API framework.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="http api rest methods status codes headers json openapi idempotency pagination errors">
+                <summary><input class="week-check" type="checkbox" data-week="1" aria-label="Mark week 1 complete"><div class="week-title"><b>Week 1 — HTTP and API programming fundamentals</b><span>Requests, responses, contracts, semantics, and resource design</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Request line, URL, query string, headers, body, cookies, content negotiation.</li><li>GET, POST, PUT, PATCH, DELETE; safe vs idempotent behavior.</li><li>2xx, 3xx, 4xx, 5xx families and consistent error bodies.</li><li>Resource-oriented URLs, nested resources, pagination, filtering, sorting.</li><li>OpenAPI, JSON Schema, API-first vs code-first development.</li><li>Backward compatibility, versioning, deprecation, and consumer impact.</li></ul><h4>Labs</h4><ol><li>Inspect real requests using browser DevTools and <code>curl -v</code>.</li><li>Design an API contract for users, projects, and jobs without coding.</li><li>Create success and failure examples for every endpoint.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>An OpenAPI-style API specification with at least 12 endpoints, pagination rules, error format, and idempotency decisions.</p><strong>Exit criterion</strong><p>You can explain why PUT is usually idempotent, why POST often is not, and when to return 201, 202, 204, 400, 401, 403, 404, 409, 422, and 429.</p></div></div>
+              </details>
+              <details class="week" data-keywords="python typing protocols dataclasses generics pydantic exceptions architecture clean code">
+                <summary><input class="week-check" type="checkbox" data-week="2"><div class="week-title"><b>Week 2 — Modern Python for API systems</b><span>Type-driven design, maintainable modules, and domain modeling</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Type hints, unions, generics, protocols, typed dictionaries, annotations.</li><li>Dataclasses vs Pydantic models vs ORM models.</li><li>Exceptions as domain signals; mapping domain errors to HTTP errors.</li><li>Dependency inversion and keeping business logic framework-independent.</li><li>Configuration via environment variables and typed settings.</li></ul><h4>Labs</h4><ol><li>Model an order workflow using enums, dataclasses, and protocols.</li><li>Write a service layer that knows nothing about FastAPI or Litestar.</li><li>Add Ruff and Pyright to a pre-commit or CI workflow.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A small framework-free domain package with interfaces for repository, cache, and event publisher.</p><strong>Exit criterion</strong><p>Business logic can be unit-tested without starting a web server or database.</p></div></div>
+              </details>
+              <details class="week" data-keywords="asyncio async await event loop concurrency parallelism blocking io threads process uvicorn asgi">
+                <summary><input class="week-check" type="checkbox" data-week="3"><div class="week-title"><b>Week 3 — Async Python, ASGI, and concurrency</b><span>Know when async helps—and when it merely wears a fancy hat</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Event loop, coroutine, task, future, cancellation, timeout.</li><li>I/O-bound vs CPU-bound work; concurrency vs parallelism.</li><li>How blocking code freezes an async worker.</li><li>ASGI lifecycle, request handling, middleware, lifespan events.</li><li>Connection pools and why unlimited concurrency is a trap.</li></ul><h4>Labs</h4><ol><li>Compare sequential HTTP calls with <code>asyncio.gather</code>.</li><li>Demonstrate blocking <code>time.sleep</code> vs <code>asyncio.sleep</code>.</li><li>Add cancellation-safe cleanup using <code>async with</code>.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A benchmark notebook or script showing latency and throughput differences for sync, async, and CPU-bound workloads.</p><strong>Exit criterion</strong><p>You can choose <code>def</code>, <code>async def</code>, thread pool, process pool, or job queue for a given workload.</p></div></div>
+              </details>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">1</div><div><h3>FastAPI Core</h3><p>Weeks 4–7 · Build clean, validated, documented API modules.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="fastapi routes path query body response pydantic validation openapi docs">
+                <summary><input class="week-check" type="checkbox" data-week="4"><div class="week-title"><b>Week 4 — FastAPI routing and validation</b><span>Path operations, request models, response models, and OpenAPI</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Application, routers, path/query/header/cookie/body parameters.</li><li>Pydantic v2 models, field constraints, validators, aliases, serialization.</li><li>Response models, status codes, headers, and custom responses.</li><li>Automatic OpenAPI generation and documentation customization.</li><li>Validation boundaries: transport model vs domain model.</li></ul><h4>Labs</h4><ol><li>Build CRUD endpoints for projects and jobs.</li><li>Add validation for dates, limits, enums, and nested objects.</li><li>Return a standardized error envelope with correlation ID.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A documented CRUD API with separate create, update, read, and list schemas.</p><strong>Exit criterion</strong><p>No raw dictionary contracts, no accidental field leakage, and every endpoint has explicit response behavior.</p></div></div>
+              </details>
+              <details class="week" data-keywords="fastapi dependency injection depends yield settings lifespan middleware exceptions">
+                <summary><input class="week-check" type="checkbox" data-week="5"><div class="week-title"><b>Week 5 — Dependency injection and application structure</b><span>Reusable dependencies, resource lifecycles, middleware, and layering</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li><code>Depends</code>, sub-dependencies, annotated dependencies, caching per request.</li><li><code>yield</code> dependencies for sessions and cleanup.</li><li>Lifespan for shared clients, pools, and startup validation.</li><li>Middleware vs dependency vs decorator vs service-layer responsibility.</li><li>Feature-based package structure and dependency direction.</li></ul><h4>Labs</h4><ol><li>Inject settings, current user, repository, and service.</li><li>Add request ID and structured timing middleware.</li><li>Override dependencies in tests.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A feature-oriented project layout with API, schemas, services, repositories, infrastructure, and tests.</p><strong>Exit criterion</strong><p>You can replace an actual repository with an in-memory fake without editing endpoint logic.</p></div></div>
+              </details>
+              <details class="week" data-keywords="security oauth2 jwt authentication authorization password hashing rbac scopes csrf cors secrets">
+                <summary><input class="week-check" type="checkbox" data-week="6"><div class="week-title"><b>Week 6 — Authentication and authorization</b><span>OAuth2 concepts, JWT/session trade-offs, RBAC, and secure defaults</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Authentication vs authorization; identity provider vs API resource server.</li><li>Password hashing, access/refresh tokens, token rotation, revocation.</li><li>JWT benefits and risks; server-side sessions using Redis.</li><li>Roles, permissions, scopes, ownership checks, multi-tenant boundaries.</li><li>CORS, CSRF, TLS, secret management, security headers, audit logging.</li></ul><h4>Labs</h4><ol><li>Implement login and refresh flow with hashed passwords.</li><li>Add role and ownership guards to protected endpoints.</li><li>Write negative tests: expired token, wrong role, cross-tenant access.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A threat-modeled auth module with documented token lifetime and revocation strategy.</p><strong>Exit criterion</strong><p>You can explain when a JWT is not the best choice and why 401 differs from 403.</p></div></div>
+              </details>
+              <details class="week" data-keywords="api design errors pagination filtering versioning idempotency openapi webhooks files streaming sse websocket">
+                <summary><input class="week-check" type="checkbox" data-week="7"><div class="week-title"><b>Week 7 — Advanced API design</b><span>Pagination, uploads, streaming, idempotency, webhooks, and compatibility</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Offset vs cursor pagination and stable sorting.</li><li>Optimistic concurrency using version columns or ETags.</li><li>Idempotency keys for payment/order-style POST requests.</li><li>File upload limits, streamed responses, SSE, and WebSockets.</li><li>Webhook signing, retries, event versioning, and replay safety.</li></ul><h4>Labs</h4><ol><li>Add cursor pagination to job history.</li><li>Implement idempotent job submission with a stored response.</li><li>Stream job progress using SSE or WebSocket.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A “production contracts” module: pagination, idempotency, webhook signature validation, and standardized errors.</p><strong>Exit criterion</strong><p>A client retry cannot accidentally create duplicate business operations.</p></div></div>
+              </details>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">2</div><div><h3>Persistence and Redis</h3><p>Weeks 8–11 · Correct transactions first, speed second.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="postgresql sql database normalization indexes query plan transactions isolation locks acid">
+                <summary><input class="week-check" type="checkbox" data-week="8"><div class="week-title"><b>Week 8 — PostgreSQL and transactional thinking</b><span>Schema design, indexes, isolation, locking, and query plans</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Primary/foreign keys, constraints, normalization, JSONB trade-offs.</li><li>Composite, partial, and covering indexes; index selectivity.</li><li>Transactions, isolation levels, lost updates, deadlocks, row locks.</li><li><code>EXPLAIN ANALYZE</code>, N+1 queries, pagination performance.</li><li>Connection pool sizing and database backpressure.</li></ul><h4>Labs</h4><ol><li>Design tables for users, projects, jobs, attempts, and audit events.</li><li>Reproduce a lost-update race and fix it.</li><li>Measure query plans before and after adding indexes.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>An ER diagram and SQL schema with constraints, indexes, and documented transaction boundaries.</p><strong>Exit criterion</strong><p>You can defend every index and identify the consistency boundary for each business action.</p></div></div>
+              </details>
+              <details class="week" data-keywords="sqlalchemy 2 asyncsession orm core repository unit of work transactions eager loading alembic migrations">
+                <summary><input class="week-check" type="checkbox" data-week="9"><div class="week-title"><b>Week 9 — SQLAlchemy 2 and Alembic</b><span>Async sessions, ORM mapping, migrations, and repository patterns</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Engine, pool, session, identity map, flush, commit, rollback.</li><li>One <code>AsyncSession</code> per request/task; never share across concurrent tasks.</li><li>Declarative mapping, relationships, eager loading, SQL expression language.</li><li>Repository and unit-of-work patterns—when they help and when they add ceremony.</li><li>Alembic revisions, autogenerate review, upgrades, downgrades, data migrations.</li></ul><h4>Labs</h4><ol><li>Connect FastAPI using a <code>yield</code> session dependency.</li><li>Implement atomic project + first-job creation.</li><li>Write and test a safe schema migration.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A PostgreSQL-backed API with migration history and integration tests.</p><strong>Exit criterion</strong><p>Every write either commits completely or rolls back completely; no session crosses request boundaries.</p></div></div>
+              </details>
+              <details class="week" data-keywords="redis cache ttl invalidation stampede strings hashes sets sorted sets rate limiting locks sessions">
+                <summary><input class="week-check" type="checkbox" data-week="10"><div class="week-title"><b>Week 10 — Redis for caching and coordination</b><span>Data types, TTLs, invalidation, rate limiting, and distributed state</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Strings, hashes, lists, sets, sorted sets, streams, and when each fits.</li><li>Cache-aside, write-through, write-behind, negative caching.</li><li>TTL jitter, cache stampede, stale-while-revalidate, invalidation.</li><li>Atomic operations, pipelines, transactions, and Lua scripts.</li><li>Rate limiting, session storage, deduplication, leaderboards.</li><li>Distributed lock caveats: leases, expiry, fencing tokens, failure modes.</li></ul><h4>Labs</h4><ol><li>Cache project reads with explicit key/version strategy.</li><li>Add a fixed-window or token-bucket rate limiter.</li><li>Store idempotency responses with expiry.</li><li>Test Redis outage behavior—API should degrade intentionally, not mysteriously.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A Redis integration module with key naming, TTL policy, serialization rules, metrics, and failure strategy.</p><strong>Exit criterion</strong><p>You can explain exactly which source is authoritative and how stale cache data is corrected.</p></div></div>
+              </details>
+              <details class="week" data-keywords="redis streams pubsub queues celery arq dramatiq background jobs workers retry dead letter idempotent">
+                <summary><input class="week-check" type="checkbox" data-week="11"><div class="week-title"><b>Week 11 — Background jobs and event processing</b><span>In-process tasks vs durable workers, Redis Streams, retries, and DLQs</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>FastAPI <code>BackgroundTasks</code> for small same-process work.</li><li>Why durable, heavy, or cross-server jobs need a worker/queue.</li><li>Celery, Dramatiq, ARQ, RQ: evaluate rather than collect them like Pokémon.</li><li>Redis Pub/Sub vs Streams: transient broadcast vs persisted log/consumer groups.</li><li>At-least-once delivery, retries, exponential backoff, dead-letter handling.</li><li>Idempotent consumers and the outbox pattern.</li></ul><h4>Labs</h4><ol><li>Move report generation into a worker.</li><li>Track state transitions: queued → running → succeeded/failed.</li><li>Handle duplicate delivery safely.</li><li>Publish progress events through Redis Streams.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A worker service with retry policy, idempotent processing, failure visibility, and job status API.</p><strong>Exit criterion</strong><p>Restarting the API or worker does not silently lose accepted work.</p></div></div>
+              </details>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">3</div><div><h3>Production Engineering</h3><p>Weeks 12–15 · Test, observe, secure, and deploy the service.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="pytest tests unit integration contract end to end fixtures mock fake testcontainers coverage property testing">
+                <summary><input class="week-check" type="checkbox" data-week="12"><div class="week-title"><b>Week 12 — Testing strategy</b><span>Unit, integration, contract, concurrency, and failure tests</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Testing pyramid and which bugs each layer catches.</li><li>FastAPI TestClient/httpx, async tests, dependency overrides.</li><li>Fakes vs mocks; database rollback fixtures; Redis isolation.</li><li>Parameterized tests, factories, property-based testing concepts.</li><li>Contract tests for external services and schema compatibility.</li><li>Race-condition and idempotency tests.</li></ul><h4>Labs</h4><ol><li>Reach meaningful coverage on service rules—not vanity coverage.</li><li>Test transaction rollback and cache invalidation.</li><li>Test two simultaneous requests attempting the same state change.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A CI test suite split into fast unit tests and container-backed integration tests.</p><strong>Exit criterion</strong><p>A clean checkout can run tests deterministically with one command.</p></div></div>
+              </details>
+              <details class="week" data-keywords="observability logs metrics traces opentelemetry prometheus structured logging correlation id slos alerts">
+                <summary><input class="week-check" type="checkbox" data-week="13"><div class="week-title"><b>Week 13 — Observability and operations</b><span>Structured logs, metrics, traces, health checks, and SLO thinking</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Logs answer “what happened,” metrics “how often,” traces “where time went.”</li><li>Structured JSON logs, request/trace IDs, sensitive-data redaction.</li><li>Golden signals: latency, traffic, errors, saturation.</li><li>OpenTelemetry instrumentation for HTTP, DB, Redis, and downstream calls.</li><li>Liveness, readiness, startup checks, and graceful shutdown.</li><li>SLIs/SLOs, alert quality, runbooks, and incident context.</li></ul><h4>Labs</h4><ol><li>Add request latency and error metrics by route template.</li><li>Trace API → PostgreSQL → Redis → worker flow.</li><li>Create a dashboard and one actionable alert.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>An operations page with service dashboard, SLO, alert, and troubleshooting runbook.</p><strong>Exit criterion</strong><p>You can diagnose a slow request without inserting random print statements and hoping for spiritual guidance.</p></div></div>
+              </details>
+              <details class="week" data-keywords="performance load testing locust k6 profiling timeouts retries circuit breaker bulkhead connection pools gzip etag">
+                <summary><input class="week-check" type="checkbox" data-week="14"><div class="week-title"><b>Week 14 — Performance and resilience</b><span>Load testing, bottlenecks, backpressure, timeouts, and retries</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Latency percentiles, throughput, saturation, coordinated omission.</li><li>Database pool, worker count, Redis connections, queue depth.</li><li>Timeout budgets, bounded retries with jitter, retryable errors.</li><li>Circuit breaker and bulkhead concepts; graceful degradation.</li><li>Profiling CPU, memory, SQL queries, and serialization.</li><li>Compression, ETags, caching headers, payload design.</li></ul><h4>Labs</h4><ol><li>Create a repeatable load test with target SLO.</li><li>Find and remove one N+1 query and one blocking call.</li><li>Simulate downstream timeout and Redis failure.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A before/after performance report with evidence, not “it feels faster.”</p><strong>Exit criterion</strong><p>You can identify the bottleneck and show how the system behaves after exceeding capacity.</p></div></div>
+              </details>
+              <details class="week" data-keywords="docker deployment kubernetes ci cd uvicorn gunicorn reverse proxy secrets migrations health graceful shutdown cloud">
+                <summary><input class="week-check" type="checkbox" data-week="15"><div class="week-title"><b>Week 15 — Containers, CI/CD, and deployment</b><span>Build, release, migrate, run, and roll back safely</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Multi-stage Docker builds, non-root user, health checks, image scanning.</li><li>ASGI server workers, process model, graceful termination.</li><li>12-factor configuration, secret managers, environment promotion.</li><li>Database migration ordering and backward-compatible releases.</li><li>CI stages: lint, type-check, test, build, scan, deploy.</li><li>Rolling, blue/green, and canary concepts; rollback strategy.</li></ul><h4>Labs</h4><ol><li>Build a minimal production image.</li><li>Run API, worker, PostgreSQL, and Redis in Compose.</li><li>Deploy to one cloud platform and validate graceful restart.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A tagged container image, CI pipeline, deployment manifest, and release checklist.</p><strong>Exit criterion</strong><p>You can deploy the same artifact across environments without rebuilding it.</p></div></div>
+              </details>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">4</div><div><h3>Litestar and Framework Portability</h3><p>Weeks 16–17 · Reuse the engineering knowledge; learn only the new abstractions.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="litestar routes controllers handlers dto dependency injection guards middleware plugins openapi">
+                <summary><input class="week-check" type="checkbox" data-week="16"><div class="week-title"><b>Week 16 — Litestar fundamentals</b><span>Handlers, controllers, DTOs, guards, dependencies, and OpenAPI</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>Route handlers, controllers, application configuration, lifespan.</li><li>Dependency injection, layered dependencies, state, middleware.</li><li>DTOs and serialization boundaries.</li><li>Guards for authorization and route-level protection.</li><li>Exception handling, OpenAPI generation, testing client.</li></ul><h4>Labs</h4><ol><li>Port the projects module from FastAPI to Litestar.</li><li>Keep domain/service/repository code unchanged.</li><li>Map equivalent validation, DI, auth, and error behavior.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A Litestar service exposing the same API contract as the FastAPI module.</p><strong>Exit criterion</strong><p>Contract tests pass against both implementations.</p></div></div>
+              </details>
+              <details class="week" data-keywords="litestar sqlalchemy advanced alchemy plugins repository dto testing comparison migration">
+                <summary><input class="week-check" type="checkbox" data-week="17"><div class="week-title"><b>Week 17 — Litestar production patterns</b><span>SQLAlchemy integration, plugins, testing, and framework evaluation</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Learn</h4><ul><li>SQLAlchemy plugins and Advanced Alchemy ecosystem.</li><li>Plugin lifecycle and application-level configuration.</li><li>Repository/service patterns available in the Litestar ecosystem.</li><li>Framework-specific ergonomics vs architecture portability.</li><li>How to evaluate documentation, ecosystem, hiring market, and maintenance risk.</li></ul><h4>Labs</h4><ol><li>Connect the ported module to the existing PostgreSQL schema.</li><li>Add Redis and observability using framework-neutral adapters.</li><li>Write a short architecture decision record (ADR): FastAPI or Litestar?</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A fair framework comparison based on the same workload and acceptance tests.</p><strong>Exit criterion</strong><p>Your choice is supported by team and system constraints—not internet fan-club energy.</p></div></div>
+              </details>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-head"><div class="phase-num">5</div><div><h3>Capstone and Readiness</h3><p>Week 18 · Integrate everything into one production-style system.</p></div></div>
+            <div class="week-list">
+              <details class="week" data-keywords="capstone portfolio architecture api fastapi litestar redis postgresql worker security testing deployment">
+                <summary><input class="week-check" type="checkbox" data-week="18"><div class="week-title"><b>Week 18 — Capstone hardening and portfolio presentation</b><span>Architecture review, load test, demo, documentation, and retrospective</span></div><span class="chev">▶</span></summary>
+                <div class="week-body"><div><h4>Finish</h4><ul><li>Threat model, dependency diagram, API contract, ER diagram.</li><li>Automated tests, CI/CD, containerized local environment.</li><li>Redis cache + rate limiter + job/event feature.</li><li>Structured logs, metrics, traces, health endpoints.</li><li>Load test report and known limits.</li><li>README with setup, architecture, trade-offs, screenshots, and demo script.</li></ul><h4>Presentation exercise</h4><ol><li>Explain the system in 2 minutes to a recruiter.</li><li>Explain one deep trade-off in 5 minutes to an engineer.</li><li>Debug a staged failure while narrating your process.</li></ol></div><div class="deliverable"><strong>Deliverable</strong><p>A public or shareable portfolio repository and a 10-minute recorded technical walkthrough.</p><strong>Exit criterion</strong><p>You can build, explain, operate, and defend the system end to end.</p></div></div>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section id="architecture">
+          <div class="section-head"><div><span class="eyebrow">Mental model</span><h2>A real-world API request path</h2></div><p>Every box creates latency, capacity limits, failure modes, and observability needs. Learn to reason across the whole path.</p></div>
+          <div class="card architecture">
+            <div class="arch-flow">
+              <div class="arch-node"><b>Client</b><span>Browser, mobile, service</span></div>
+              <div class="arch-node"><b>Gateway</b><span>TLS, auth, routing, limits</span></div>
+              <div class="arch-node"><b>ASGI API</b><span>FastAPI or Litestar</span></div>
+              <div class="arch-node"><b>Service layer</b><span>Business rules, transaction</span></div>
+              <div class="arch-node"><b>PostgreSQL</b><span>Source of truth</span></div>
+              <div class="arch-node"><b>Redis</b><span>Cache, rate, state, events</span></div>
+              <div class="arch-node"><b>Workers</b><span>Durable async processing</span></div>
+            </div>
+          </div>
+          <div class="grid-3" style="margin-top:18px">
+            <div class="card"><h3>Request path questions</h3><p>Where is authentication checked? What is the timeout budget? Which calls are retried? What is the transaction boundary? Which response is cacheable?</p></div>
+            <div class="card"><h3>Capacity questions</h3><p>How many API workers, DB connections, Redis connections, and worker slots exist? What applies backpressure before the database melts?</p></div>
+            <div class="card"><h3>Failure questions</h3><p>What if Redis is unavailable? What if the worker dies after completing work but before acknowledging it? What if a client retries?</p></div>
+          </div>
+        </section>
+
+        <section id="redis">
+          <div class="section-head"><div><span class="eyebrow">Must-know dependency</span><h2>Redis mastery map</h2></div><p>Redis is not “just a cache.” It is a fast data-structure server used for caching, sessions, coordination, rate limiting, and event processing—but each use case has different correctness requirements.</p></div>
+          <div class="grid-3">
+            <div class="card"><h3>Data type → use case</h3><div class="skill-list"><div class="skill"><span>String</span><span>Cache, counters, tokens</span></div><div class="skill"><span>Hash</span><span>Compact object fields</span></div><div class="skill"><span>Set</span><span>Membership, uniqueness</span></div><div class="skill"><span>Sorted set</span><span>Ranking, schedules, sliding windows</span></div><div class="skill"><span>Stream</span><span>Persisted events, consumer groups</span></div></div></div>
+            <div class="card"><h3>Production rules</h3><div class="checklist" style="grid-template-columns:1fr"><div class="check-item">Name keys consistently and include tenant/version where required.</div><div class="check-item">Set TTL intentionally; “forever” is a policy, not a default.</div><div class="check-item">Define behavior when Redis is slow or unavailable.</div><div class="check-item">Measure hit ratio, latency, errors, evictions, and memory.</div><div class="check-item">Never use cache as accidental source of truth.</div></div></div>
+            <div class="card"><h3>Common traps</h3><div class="skill-list"><div class="skill"><span>Cache stampede</span><span>Many misses rebuild together</span></div><div class="skill"><span>Hot key</span><span>One key overloads node</span></div><div class="skill"><span>Stale authorization</span><span>Permissions cached too long</span></div><div class="skill"><span>Lock expiry</span><span>Two owners act concurrently</span></div><div class="skill"><span>Pub/Sub loss</span><span>Disconnected consumers miss data</span></div></div></div>
+          </div>
+          <div class="callout" style="margin-top:18px"><strong>Decision rule:</strong> use Pub/Sub for transient broadcasts where missed messages are acceptable; use Streams or a dedicated broker when consumers need persistence, replay, acknowledgement, and consumer tracking.</div>
+        </section>
+
+        <section id="labs">
+          <div class="section-head"><div><span class="eyebrow">Reference labs</span><h2>Core implementation patterns</h2></div><p>These snippets are intentionally small. In the capstone, place them behind clear modules, add tests, and handle lifecycle and failure behavior.</p></div>
+          <div class="card">
+            <div class="tabs" role="tablist">
+              <button class="tab-btn active" data-tab="fastapi-lab">FastAPI</button>
+              <button class="tab-btn" data-tab="di-lab">DI + service</button>
+              <button class="tab-btn" data-tab="redis-lab">Redis cache</button>
+              <button class="tab-btn" data-tab="litestar-lab">Litestar</button>
+              <button class="tab-btn" data-tab="compose-lab">Docker Compose</button>
+            </div>
+            <div class="tab-panel active" id="fastapi-lab"><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>from typing import Annotated
+from fastapi import FastAPI, Query, status
+from pydantic import BaseModel, ConfigDict, Field
+
+app = FastAPI(title="Job Control API", version="1.0.0")
+
+class JobCreate(BaseModel):
+    name: str = Field(min_length=3, max_length=100)
+    priority: int = Field(default=5, ge=1, le=10)
+
+class JobRead(JobCreate):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    state: str
+
+@app.post("/jobs", response_model=JobRead, status_code=status.HTTP_201_CREATED)
+async def create_job(payload: JobCreate) -> JobRead:
+    return JobRead(id=1, state="queued", **payload.model_dump())
+
+@app.get("/jobs", response_model=list[JobRead])
+async def list_jobs(limit: Annotated[int, Query(ge=1, le=100)] = 20) -> list[JobRead]:
+    return []</code></pre></div></div>
+            <div class="tab-panel" id="di-lab"><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>from typing import Annotated, Protocol
+from fastapi import Depends
+
+class JobRepository(Protocol):
+    async def create(self, name: str, priority: int): ...
+
+class JobService:
+    def __init__(self, repo: JobRepository) -> None:
+        self.repo = repo
+
+    async def submit(self, name: str, priority: int):
+        # Business rule belongs here, not in the route.
+        if name.lower().startswith("test-") and priority > 5:
+            priority = 5
+        return await self.repo.create(name=name, priority=priority)
+
+async def get_job_service() -> JobService:
+    return JobService(repo=PostgresJobRepository())
+
+JobServiceDep = Annotated[JobService, Depends(get_job_service)]</code></pre></div></div>
+            <div class="tab-panel" id="redis-lab"><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import json
+from redis.asyncio import Redis
+
+async def get_project(redis: Redis, repo, project_id: int) -> dict | None:
+    key = f"project:v1:{project_id}"
+    cached = await redis.get(key)
+    if cached is not None:
+        return json.loads(cached)
+
+    project = await repo.get(project_id)
+    if project is None:
+        # Short negative cache reduces repeated misses.
+        await redis.set(key, "null", ex=15)
+        return None
+
+    payload = project.to_dict()
+    # Add TTL jitter in high-scale systems to reduce synchronized expiry.
+    await redis.set(key, json.dumps(payload), ex=300)
+    return payload
+
+async def invalidate_project(redis: Redis, project_id: int) -> None:
+    await redis.delete(f"project:v1:{project_id}")</code></pre></div></div>
+            <div class="tab-panel" id="litestar-lab"><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>from dataclasses import dataclass
+from litestar import Litestar, get, post
+
+@dataclass
+class JobCreate:
+    name: str
+    priority: int = 5
+
+@dataclass
+class JobRead:
+    id: int
+    name: str
+    priority: int
+    state: str
+
+@post("/jobs", status_code=201)
+async def create_job(data: JobCreate) -> JobRead:
+    return JobRead(id=1, state="queued", **data.__dict__)
+
+@get("/jobs")
+async def list_jobs() -> list[JobRead]:
+    return []
+
+app = Litestar(route_handlers=[create_job, list_jobs])</code></pre></div></div>
+            <div class="tab-panel" id="compose-lab"><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>services:
+  api:
+    build: .
+    command: uv run fastapi run app/main.py --port 8000
+    env_file: .env
+    ports: ["8000:8000"]
+    depends_on: [postgres, redis]
+
+  worker:
+    build: .
+    command: uv run python -m app.worker
+    env_file: .env
+    depends_on: [postgres, redis]
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:8
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]</code></pre></div></div>
+          </div>
+        </section>
+
+        <section id="comparison">
+          <div class="section-head"><div><span class="eyebrow">Framework decision</span><h2>FastAPI vs Litestar</h2></div><p>Both are ASGI frameworks with modern Python typing and OpenAPI support. The right choice depends on team familiarity, ecosystem needs, framework abstractions, and operational fit.</p></div>
+          <div class="card" style="overflow-x:auto">
+            <table class="compare">
+              <thead><tr><th>Dimension</th><th>FastAPI</th><th>Litestar</th><th>Learning focus</th></tr></thead>
+              <tbody>
+                <tr><td>Core style</td><td>Function routes with <code>Depends</code>; built on Starlette and Pydantic.</td><td>Handlers/controllers with built-in DI, DTOs, guards, plugins, and additional framework abstractions.</td><td>Do not compare “hello world”; compare a full module.</td></tr>
+                <tr><td>Validation & serialization</td><td>Strong Pydantic-centered workflow.</td><td>DTO/serialization system supports multiple modeling approaches.</td><td>Keep transport schemas distinct from domain and ORM models.</td></tr>
+                <tr><td>Dependency injection</td><td>Simple, explicit dependency graph through route parameters.</td><td>Layered DI and plugin extension points.</td><td>Understand lifecycle, scope, caching, and test replacement.</td></tr>
+                <tr><td>Database integration</td><td>Flexible; assemble SQLAlchemy patterns or use third-party helpers.</td><td>First-party SQLAlchemy/Advanced Alchemy ecosystem integration.</td><td>Transactions and session safety matter more than convenience APIs.</td></tr>
+                <tr><td>Ecosystem & familiarity</td><td>Very broad awareness, examples, and community adoption.</td><td>Smaller ecosystem with batteries-included design ambitions.</td><td>Evaluate hiring, support, upgrades, plugins, and team comfort.</td></tr>
+                <tr><td>Best learning sequence</td><td>Learn first because abundant examples expose core ASGI/Pydantic patterns.</td><td>Learn second by porting an existing feature and comparing abstractions.</td><td>Framework two should take days, not months, after fundamentals are strong.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="decision">
+            <div class="card"><h3>Choose FastAPI when…</h3><p>Your team values a large ecosystem, familiar Pydantic patterns, broad community knowledge, and highly explicit route-level composition.</p></div>
+            <div class="or">OR</div>
+            <div class="card"><h3>Choose Litestar when…</h3><p>Your team prefers more built-in framework structure, DTOs, guards, plugins, and its integrated SQLAlchemy/Advanced Alchemy approach.</p></div>
+          </div>
+        </section>
+
+        <section id="capstone">
+          <div class="section-head"><div><span class="eyebrow">Portfolio project</span><h2>Capstone: DataFlow Control Plane</h2></div><p>A credible project for a data engineer: an API that submits, schedules, monitors, and audits data-processing jobs across workers.</p></div>
+          <div class="card">
+            <div class="capstone-board">
+              <div class="cap-col"><h4>API surface</h4><div class="cap-card">Users, tenants, roles</div><div class="cap-card">Projects and job definitions</div><div class="cap-card">Job submission + idempotency</div><div class="cap-card">Cursor-paginated history</div><div class="cap-card">SSE/WebSocket progress</div></div>
+              <div class="cap-col"><h4>Data & Redis</h4><div class="cap-card">PostgreSQL source of truth</div><div class="cap-card">SQLAlchemy + Alembic</div><div class="cap-card">Redis cache-aside</div><div class="cap-card">Rate limiter</div><div class="cap-card">Streams or worker queue</div></div>
+              <div class="cap-col"><h4>Correctness</h4><div class="cap-card">Atomic state transitions</div><div class="cap-card">Optimistic locking</div><div class="cap-card">Idempotent consumers</div><div class="cap-card">Outbox pattern</div><div class="cap-card">Audit events</div></div>
+              <div class="cap-col"><h4>Operations</h4><div class="cap-card">Structured logs</div><div class="cap-card">OpenTelemetry traces</div><div class="cap-card">Metrics + SLO</div><div class="cap-card">Load test</div><div class="cap-card">CI/CD + Docker</div></div>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:18px">
+            <div class="card"><h3>Minimum architecture decisions</h3><ol class="muted"><li>What makes job submission idempotent?</li><li>Where does a job state transition transaction begin and end?</li><li>What happens if the worker succeeds but acknowledgement fails?</li><li>How does cache invalidation happen after a project update?</li><li>Which endpoints remain available when Redis is down?</li><li>How are tenant boundaries enforced at every data access?</li></ol></div>
+            <div class="card"><h3>Portfolio evidence</h3><ol class="muted"><li>Architecture diagram and ADRs.</li><li>OpenAPI spec and sample requests.</li><li>Automated test report.</li><li>Load-test graph with p50/p95/p99.</li><li>Trace screenshot for one job lifecycle.</li><li>Demo video and “what I would improve next” section.</li></ol></div>
+          </div>
+        </section>
+
+        <section id="production">
+          <div class="section-head"><div><span class="eyebrow">Release gate</span><h2>Production readiness checklist</h2></div><p>Use this before calling any API “production-ready.” The checklist is intentionally stricter than “it works on my laptop.”</p></div>
+          <div class="checklist">
+            <div class="check-item">OpenAPI accurately documents success and error contracts.</div>
+            <div class="check-item">Authentication, authorization, ownership, and tenant isolation are tested.</div>
+            <div class="check-item">Secrets are externalized; logs redact tokens and sensitive data.</div>
+            <div class="check-item">Request size, upload size, timeouts, and rate limits are bounded.</div>
+            <div class="check-item">Writes have explicit transaction boundaries and rollback behavior.</div>
+            <div class="check-item">Retries are bounded, jittered, and only used for retryable operations.</div>
+            <div class="check-item">POST retries cannot duplicate critical business operations.</div>
+            <div class="check-item">Cache keys, TTLs, invalidation, fallbacks, and metrics are documented.</div>
+            <div class="check-item">Background work is durable when the API has already returned 202.</div>
+            <div class="check-item">Health checks distinguish process liveness from dependency readiness.</div>
+            <div class="check-item">Logs, metrics, and traces share request/trace correlation.</div>
+            <div class="check-item">Database migrations are backward compatible with rolling deployment.</div>
+            <div class="check-item">Load test confirms latency and capacity targets.</div>
+            <div class="check-item">Graceful shutdown stops accepting work and drains in-flight requests.</div>
+            <div class="check-item">Runbooks explain common failures and rollback steps.</div>
+            <div class="check-item">Dependency and container vulnerability scanning runs in CI.</div>
+          </div>
+        </section>
+
+        <section id="interview">
+          <div class="section-head"><div><span class="eyebrow">Explain what you built</span><h2>Interview readiness questions</h2></div><p>Practice answering from your capstone, using diagrams, metrics, and incidents you simulated.</p></div>
+          <div class="grid-2">
+            <div class="card"><h3>API and framework</h3><ol class="muted"><li>What happens from the moment an HTTP request reaches your service?</li><li>How does FastAPI dependency injection resolve and cache dependencies?</li><li>When would you use middleware instead of a dependency?</li><li>How do FastAPI and Litestar differ in validation, DI, and organization?</li><li>How do you preserve backward compatibility?</li><li>Why can an async endpoint still block the server?</li></ol></div>
+            <div class="card"><h3>Data, Redis, and reliability</h3><ol class="muted"><li>How do you avoid sharing an AsyncSession across concurrent tasks?</li><li>How do you prevent duplicate job submission?</li><li>What is your cache invalidation strategy?</li><li>Redis Pub/Sub or Streams—why?</li><li>What happens during a cache stampede?</li><li>How do you make a worker retry safe?</li></ol></div>
+            <div class="card"><h3>Security and testing</h3><ol class="muted"><li>When would you choose server-side sessions over JWT?</li><li>How do you distinguish authentication from authorization?</li><li>How do you test tenant isolation?</li><li>Which logic is unit-tested vs integration-tested?</li><li>How do you test transaction rollback and race conditions?</li><li>Which data must never appear in logs?</li></ol></div>
+            <div class="card"><h3>Operations and scale</h3><ol class="muted"><li>What is your service SLO?</li><li>Which metric tells you the DB pool is saturated?</li><li>How do you set worker count and pool size?</li><li>What is your timeout and retry budget?</li><li>How does the service behave when Redis is unavailable?</li><li>What did your load test reveal?</li></ol></div>
+          </div>
+        </section>
+
+        <section id="resources">
+          <div class="section-head"><div><span class="eyebrow">Primary sources</span><h2>Official documentation path</h2></div><p>Read official tutorials first, then use framework source code and focused experiments when behavior is unclear.</p></div>
+          <div class="resource-list">
+            <a class="resource" href="https://fastapi.tiangolo.com/tutorial/" target="_blank" rel="noreferrer"><b>FastAPI Tutorial</b><span>Recommended official learning path and feature guide</span></a>
+            <a class="resource" href="https://fastapi.tiangolo.com/tutorial/dependencies/" target="_blank" rel="noreferrer"><b>FastAPI Dependencies</b><span>Dependency injection, sub-dependencies, and integration</span></a>
+            <a class="resource" href="https://fastapi.tiangolo.com/tutorial/security/" target="_blank" rel="noreferrer"><b>FastAPI Security</b><span>Security schemes and OAuth2 building blocks</span></a>
+            <a class="resource" href="https://docs.litestar.dev/latest/" target="_blank" rel="noreferrer"><b>Litestar Documentation</b><span>Handlers, DI, DTOs, guards, plugins, and OpenAPI</span></a>
+            <a class="resource" href="https://docs.litestar.dev/latest/tutorials/sqlalchemy/0-introduction.html" target="_blank" rel="noreferrer"><b>Litestar SQLAlchemy Tutorial</b><span>Database integration and application patterns</span></a>
+            <a class="resource" href="https://docs.pydantic.dev/latest/" target="_blank" rel="noreferrer"><b>Pydantic Documentation</b><span>Validation, serialization, settings, and model design</span></a>
+            <a class="resource" href="https://docs.sqlalchemy.org/en/20/" target="_blank" rel="noreferrer"><b>SQLAlchemy 2 Documentation</b><span>ORM, SQL expressions, sessions, transactions, and asyncio</span></a>
+            <a class="resource" href="https://alembic.sqlalchemy.org/en/latest/tutorial.html" target="_blank" rel="noreferrer"><b>Alembic Tutorial</b><span>Schema migration environment and revision workflow</span></a>
+            <a class="resource" href="https://redis.io/docs/latest/develop/" target="_blank" rel="noreferrer"><b>Redis Developer Docs</b><span>Data types, caching, streams, Pub/Sub, and clients</span></a>
+            <a class="resource" href="https://developer.mozilla.org/en-US/docs/Web/HTTP" target="_blank" rel="noreferrer"><b>MDN HTTP Reference</b><span>Methods, status codes, headers, caching, and semantics</span></a>
+            <a class="resource" href="https://docs.pytest.org/en/stable/" target="_blank" rel="noreferrer"><b>pytest Documentation</b><span>Fixtures, parametrization, markers, and test organization</span></a>
+            <a class="resource" href="https://opentelemetry.io/docs/languages/python/" target="_blank" rel="noreferrer"><b>OpenTelemetry Python</b><span>Traces, metrics, logs, and instrumentation</span></a>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer">Production Python APIs Curriculum · Built as a self-contained interactive HTML learning plan · Progress is stored only in your browser.</footer>
+    </main>
+  </div>
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Open navigation">☰</button>
+
+  <script>
+    const root = document.documentElement;
+    const sidebar = document.getElementById('sidebar');
+    const weeks = [...document.querySelectorAll('.week-check')];
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    function loadProgress() {
+      const saved = JSON.parse(localStorage.getItem('apiCurriculumProgress') || '{}');
+      weeks.forEach(cb => cb.checked = Boolean(saved[cb.dataset.week]));
+      updateProgress();
+    }
+    function saveProgress() {
+      const data = {};
+      weeks.forEach(cb => data[cb.dataset.week] = cb.checked);
+      localStorage.setItem('apiCurriculumProgress', JSON.stringify(data));
+      updateProgress();
+    }
+    function updateProgress() {
+      const done = weeks.filter(cb => cb.checked).length;
+      const pct = Math.round((done / weeks.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressText.textContent = `${pct}% · ${done}/${weeks.length} weeks`;
+    }
+    weeks.forEach(cb => {
+      cb.addEventListener('click', e => e.stopPropagation());
+      cb.addEventListener('change', saveProgress);
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('apiCurriculumTheme', next);
+    });
+    const savedTheme = localStorage.getItem('apiCurriculumTheme');
+    if (savedTheme) root.dataset.theme = savedTheme;
+
+    document.getElementById('expandAll').addEventListener('click', e => {
+      const details = [...document.querySelectorAll('details.week:not(.hidden)')];
+      const shouldOpen = details.some(d => !d.open);
+      details.forEach(d => d.open = shouldOpen);
+      e.currentTarget.textContent = shouldOpen ? 'Collapse all weeks' : 'Expand all weeks';
+    });
+    document.getElementById('resetProgress').addEventListener('click', () => {
+      if (confirm('Reset all curriculum progress?')) {
+        localStorage.removeItem('apiCurriculumProgress');
+        weeks.forEach(cb => cb.checked = false);
+        updateProgress();
+      }
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = btn.parentElement.querySelector('code').innerText;
+        await navigator.clipboard.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => btn.textContent = old, 1200);
+      });
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    const search = document.getElementById('weekSearch');
+    function filterWeeks() {
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll('details.week').forEach(d => {
+        const haystack = `${d.dataset.keywords || ''} ${d.innerText}`.toLowerCase();
+        d.classList.toggle('hidden', q && !haystack.includes(q));
+      });
+    }
+    search.addEventListener('input', filterWeeks);
+    document.getElementById('clearSearch').addEventListener('click', () => { search.value = ''; filterWeeks(); search.focus(); });
+
+    const navLinks = [...document.querySelectorAll('.nav-link')];
+    const observedSections = [...document.querySelectorAll('header[id], section[id]')];
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${visible.target.id}`));
+    }, { rootMargin: '-20% 0px -65% 0px', threshold: [0.01, .2, .5] });
+    observedSections.forEach(s => observer.observe(s));
+
+    document.getElementById('mobileToggle').addEventListener('click', () => sidebar.classList.toggle('open'));
+    navLinks.forEach(a => a.addEventListener('click', () => sidebar.classList.remove('open')));
+
+    loadProgress();
+  </script>
+</body>
+</html>
