@@ -1,4 +1,4 @@
-from models import JobStatus
+from .models import JobStatus
 
 def describe_job(status: JobStatus|None) -> str:
     """
